@@ -1,0 +1,32 @@
+version: '3'
+services:
+  database:
+    image: postgres:15.2-alpine
+    container_name: database
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  app:
+    container_name: app
+    build:
+      context: .
+      args:
+        - GRADLE_COMMAND=clean build
+    depends_on:
+      - database
+    restart: always
+    environment:
+      DATABASE_URL: jdbc:postgresql://database:5432/postgres
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      SERVER_PORT: 8085
+    ports:
+      - "8085:8085"
+volumes:
+  pgdata:
